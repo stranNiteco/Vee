@@ -56,9 +56,7 @@ condition       : expression Then expression
                 ;
 patterns        : expression Is match (Pipe match)*
                 ;
-match           : pattern whenClause? Then expression
-                ;
-whenClause      : (When expression)?
+match           : pattern (When expression)? Then expression
                 ;
 pattern         : listPattern
                 | mapPattern
