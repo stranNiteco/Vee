@@ -1,4 +1,4 @@
-// Generated from C:/work/Vee\Vee.g4 by ANTLR 4.6
+// Generated from C:/work/Vee\Vee.g4 by ANTLR 4.7
 // jshint ignore: start
 var antlr4 = require('antlr4/index');
 
@@ -66,14 +66,14 @@ VeeVisitor.prototype.visitParameterizedType = function(ctx) {
 };
 
 
-// Visit a parse tree produced by VeeParser#sumType.
-VeeVisitor.prototype.visitSumType = function(ctx) {
+// Visit a parse tree produced by VeeParser#productType.
+VeeVisitor.prototype.visitProductType = function(ctx) {
   return this.visitChildren(ctx);
 };
 
 
-// Visit a parse tree produced by VeeParser#productType.
-VeeVisitor.prototype.visitProductType = function(ctx) {
+// Visit a parse tree produced by VeeParser#sumType.
+VeeVisitor.prototype.visitSumType = function(ctx) {
   return this.visitChildren(ctx);
 };
 
