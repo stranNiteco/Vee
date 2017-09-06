@@ -6,12 +6,12 @@ Some notable features that we strive for:
 - Easy to use with predictable, declarative syntax
 - Simplified type system, with only a few primitive types and ways to combine them
 - Supports algebraic data types: tuples, records
-- No funny business with `null` or `undefined`, missing values must be declared explicitly with the type `option` and handled explicitly using pattern matching or fallbacks.
 - Highly composable because everything is an expression
 - Functionally inspired where functions are first-class construct that can be:
     - declared with named or anonymously with lambda expressions
     - partially applied to create another function
     - composed together with other functions if their input and output matches
+- No funny business with `null` or `undefined`, missing values must be declared explicitly with the type `option` and handled explicitly using pattern matching or fallbacks.
 
 ## Types
 
@@ -481,8 +481,8 @@ in left - right
 Predicates are functions that take in one argument and returns true/false. These functions can be composed in a manner similar to boolean logic.
 
 ```
-let divisible: \(x,y)->|?1%y| >> |?=0|,
-    isLeapYear: divisibe(?, 4) && !divisible(?, 100) || divisible(?, 400),
+let divisibleBy: \(divisor) -> |? % divisor| >> |?=0|,
+    isLeapYear: divisibleBy(4) && !divisibleBy(100) || divisibleBy(400),
     years:[1900..+1..2020] 
 in List.filter(isLeapYear, years)
 
@@ -545,9 +545,9 @@ in List.filter(isLeapYear, years)
             <td>List/map index</td>
             <td><code>.[x]</code></td>
             <td>
-                <code>map['key']</code>
+                <code>map.['key']</code>
                 <br>
-                <code>list[0]</code>
+                <code>list.[0]</code>
             </td>
         </tr>
     </tbody>

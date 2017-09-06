@@ -2,13 +2,6 @@ grammar Vee;
 // - PARSER RULES
 root            : (declarations In)? expression EOF
                 ;
-// - - TYPEDEFS
-/*
-typeDefs        : Type typeDef (Comma typeDef)*
-                ;
-typeDef         : Name typeAnnotation
-                ;
-*/
 type            : typeName                      #builtinType
                 | Name                          #namedType
                 | Wildcard                      #openType
