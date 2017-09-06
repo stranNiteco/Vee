@@ -5,35 +5,13 @@ Vee is a small functional expression language for non-programmers / domain exper
 Some notable features that we strive for:
 - Easy to use with predictable, declarative syntax
 - Simplified type system, with only a few primitive types and ways to combine them
-- Supports algebraic data types: tuples, records and enumeration to express complex business requirements without resorting to clunky OOP styled inheritance
+- Supports algebraic data types: tuples, records
 - No funny business with `null` or `undefined`, missing values must be declared explicitly with the type `option` and handled explicitly using pattern matching or fallbacks.
 - Highly composable because everything is an expression
 - Functionally inspired where functions are first-class construct that can be:
     - declared with named or anonymously with lambda expressions
     - partially applied to create another function
     - composed together with other functions if their input and output matches
-- Strongly-typed to provide safety and scalability
-
-A full program can consists of several type definitions at the top, some variable declarations and the final returning expression:
-
-```
-type Shape: enum(
-                Rectangle(width: number, height: number)
-                | Square(size: number)
-                | Circle(radius: number)
-                | Triangle(width: number, height: number)
-            ),
-let shapes: [Rectangle(20, 10), Square(10), Circle(60), Triangle(4,5)],
-    area: \(shape: Shape) -> 
-        if shape is Rectangle(w, h) then w * h
-                  | Square(s) then s ^ 2
-                  | Circle(r) then r ^2 * Math.PI
-                  | Triangle(w, h) then w * h / 2
-in shapes
-|> List.transform(area, ?)
-|> List.filter(|?>0|, ?)
-|> List.reduce(|?1+?2|, ?)
-```
 
 ## Types
 
@@ -241,7 +219,8 @@ There are several ways to define a function:
 They can be defined with name or anonymously with lambda expresion:
 
 ```
-\(x: number, y: number) -> x + y
+\x->x+1
+\(x, y) -> x + y
 ```
 
 #### Partial application
@@ -300,23 +279,9 @@ Most operators can be lifted to become a function:
     </tbody>
 </table>
 
-
-
-## Type definition `type ... : ...`
-
-Define the types and aliases to be used in subsequent expressions
-
-```
-type Shape: enum(
-    Rectangle(width: number, height: number)
-    | Square(size: number)
-    | Circle(radius: number)
-    | Triangle(width: number, height: number)
-),
-```
 ## Variable declarations `let ... in ...`
 
-A series of variable declarations that can serve as intermediate values in the subsequent declarations and the final expression.
+A full program can consists of several (optional) variable declarations and the final result expression. Each declaration can serve as intermediate values in subsequent declarations and the final expression.
 
 ```
 let left  : 0
@@ -455,7 +420,7 @@ in left - right
     </tbody>
 </table>
 
-### Combination
+### Concatenation
 
 <table>
     <thead>
@@ -467,22 +432,96 @@ in left - right
     </thead>
     <tbody>
         <tr>
-            <td>String concatenation</td>
+            <td>Concatenation</td>
             <td><code>::</code></td>
             <td>
-                <code>'Hello' :: ' ' :: 'world'</code>
+                <dl>
+                    <dt>String concatenation</dt>
+                    <dd><code>'Hello' :: ' ' :: 'world'</code></dd>
+                    <dt>List concatenation</dt>
+                    <dd><code>[number] :: [1] :: [2,3,4]</code></dd>
+                    <dt>Map concatenation</dt>
+                    <dd><code>{"a":1, "b":2} :: {"b":0, "c":-1}</code></dd>
+                </dl>
             </td>
-        </tr>
-        <tr>
-            <td>Function concatenation</td>
-            <td><code>&gt;&gt;</code></td>
-            <td>
-                <code>g >> f</code> is a function that produces the same result as <code>f(g(?))</code></td>
         </tr>
     </tbody>
 </table>
 
-### Member access `.`
+### Function composition
+
+<table>
+    <thead>
+        <tr>
+            <th>Operator</th>
+            <th>Symbol</th>
+            <th>Examples</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Compose right</td>
+            <td><code>&gt;&gt;</code></td>
+            <td>
+                <code>x |> (f >> g) = g(f(x))</code>
+            </td>
+        </tr>
+        <tr>
+            <td>Compose left</td>
+            <td><code>&lt;&lt;</code></td>
+            <td>
+                <code>(f << g)(x) = f(g(x))</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+### Predicate composition
+
+Predicates are functions that take in one argument and returns true/false. These functions can be composed in a manner similar to boolean logic.
+
+```
+let divisible: \(x,y)->|?1%y| >> |?=0|,
+    isLeapYear: divisibe(?, 4) && !divisible(?, 100) || divisible(?, 400),
+    years:[1900..+1..2020] 
+in List.filter(isLeapYear, years)
+
+```
+
+<table>
+    <thead>
+        <tr>
+            <th>Operator</th>
+            <th>Symbol</th>
+            <th>Examples</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>And</td>
+            <td><code>&amp;&amp;</code></td>
+            <td>
+                <code>(f &amp;&amp; g)(x) = f(x) and g(x)</code>
+            </td>
+        </tr>
+        <tr>
+            <td>Or</td>
+            <td><code>||</code></td>
+            <td>
+                <code>(f || g)(x) = f(x) or g(x)</code>
+            </td>
+        </tr>
+        <tr>
+            <td>Not</td>
+            <td><code>!</code></td>
+            <td>
+                <code>(!f)(x) = not f(x)</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+### Member access
 
 <table>
     <thead>
@@ -522,9 +561,9 @@ Returns the name type of the expression on the right as a string `typeof x`
 
 ```
 [0..100]
-|> List.filter(\(x: number) -> x % 2 = 0, ?)
-|> List.transform(|?*?|)
-|> List.reduce(|?1+?2|, 0)
+|> List.filter(|?%2| >> |?=0|, ?)
+|> List.transform(|?*?|, ?)
+|> List.reduce(|?1+?2|, 0, ?)
 ```
 
 ### Conditional `if ... then ... else ...`
@@ -541,23 +580,24 @@ else 'positive'
 
 ### Pattern matching
 
-Best used for testing the shape of complex data types (list, dictionary, tuple, record or enumeration) to see if they match a certain pattern
+This expression is used to test if a complex data object matches a particular shape, then extract matching parts from it. Think of it as an advance form of the switch statement commonly found in procedural languages.
 
 #### List pattern
 
 ```
-let sum: \(nums: list(number)) -> 
-    if nums is [] then 0
+let sum: \nums -> 
+    if nums is
+    | [] then 0
     | [a, b] then a + b
     | [head, ..rest] then head + sum(rest)
     else 0
 in sum([0..100])
 ```
 
-#### Dictionary pattern
+#### Map pattern
 
 ```
-if dict is 
+if data is
 | { ['x'], ['y'] } then 'Both x and y are in the map'
 | { ['x']:x } then 'Only x=\{x}'
 | { ['y']:y } then 'Only y=\{y}'
@@ -567,7 +607,7 @@ else 'Neither x or y is in the map'
 #### Tuple pattern
 
 ```
-if pair is 
+if pair is
 | ('', _) then 'Pair with empty key'
 | (_, '') then 'Pair with empty value'
 | (key, value) then 'Key=\{key} and Value=\{value}'
@@ -587,10 +627,11 @@ else 'Not waldo'
 ```
 let aOption: readInput('A='),
     bOption: readInput('B='),
-in if (aOption, bOption) is (Some(a), Some(b)) then 'A=\{a} and B=\{b}'
-                         | (Some(a), ?) then 'A=\{a}'
-                         | (?, Some(b)) then 'B=\{b}'
-                         else 'no input was given'
+in  if (aOption, bOption) is 
+    | (some a, some b) then 'A=\{a} and B=\{b}'
+    | (some a, ?) then 'A=\{a}'
+    | (?, some b) then 'B=\{b}'
+    else 'no input was given'
 ```
 
 ## Operator precedences

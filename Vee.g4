@@ -1,24 +1,24 @@
 grammar Vee;
 // - PARSER RULES
-root            : setup? expression EOF
-                ;
-setup           : typeDefs In
-                | declarations
-                | typeDefs Comma? declarations
+root            : (declarations In)? expression EOF
                 ;
 // - - TYPEDEFS
+/*
 typeDefs        : Type typeDef (Comma typeDef)*
                 ;
-typeDef         : Name Colon type
+typeDef         : Name typeAnnotation
                 ;
-type            : typeName                                                  #basicType
-                | Name                                                      #namedType
-                | OpenTypeParam                                             #openType
-                | Name Colon type                                           #aliasType
-                | type LParen type RParen                                   #parameterizedType
-                | type Arrow type                                           #functionType
-                | type Comma type                                           #productType
-                | type Pipe type                                            #sumType
+*/
+type            : typeName                      #builtinType
+                | Name                          #namedType
+                | Wildcard                      #openType
+                | Name typeAnnotation           #aliasType
+                | type LParen type RParen       #parameterizedType
+                | type Arrow type               #functionType
+                | type Comma type               #productType
+                | type Pipe type                #sumType
+                ;
+typeAnnotation  : Colon type
                 ;
 typeName        : StringType
                 | NumberType
@@ -32,32 +32,33 @@ typeName        : StringType
                 | OptionType
                 | UnitType
                 ;
-
 // - - EXPRESSIONS
 expression
-/*literal*/     : constant                                                                      #value                  // string, boolean, number
-                | Name                                                                          #variable               // x; x1; _; $; _x; $x, list, map...
-                | LParen expression (Comma expression)+ RParen                                  #tuple                  // (x,y) (any)
+/*literal*/     : constant                                                                      #value                  // 'string', true, false, 1.25, NaN
+                | Name                                                                          #variable               // x; x1; _; $; _x; $x
+                | LParen expression (Comma expression)+ RParen                                  #tuple                  // (x,y)
                 | LBrace recordPair (Comma recordPair)* RBrace                                  #record                 // { key: value }
-                | LBrace (mapItems | mapType) RBrace                                            #map                    // { [1]:2, ['key']:value }
-                | LBracket (nums|listItems|type) RBracket                                       #list                   // [x,y,z]; [0..100]; [-1..-2..-100];
+                | LBrace (mapItems | mapItemType|) RBrace                                       #map                    // { [1]:2, ['key']:value }
+                | LBracket (nums|listItems|type|) RBracket                                      #list                   // [x,y,z]; [0..100]; [-1..-2..-100];
 /*grouping*/    | LParen expression RParen                                                      #grouping               // (x+y) (any)
 /*invocation*/  | expression Dot member                                                         #access                 // x.y, a.b.c.d (object...) x.[1], x.["key"], x.[1].[2], x.["y"].["z"] (list|map|record)
                 | expression LParen argument? (Comma argument)* RParen                          #invocation             // f(x); g(x,y) (func)
 /*operations*/  | op=Not expression                                                             #logicalNot             // not x, not isPrime (boolean,  func<.. bool>)
+                | op=Inverse expression                                                         #predicateInversion     // !isTrue
                 | op=(Plus|Minus) expression                                                    #unary                  // +x; -x; (number)
                 | op=TypeOf expression                                                          #typeof                 // typeof x (any)
-                | l=expression  op=Pow                      r=expression                        #exponentiation         // x^y (number)
-                | l=expression  op=(Multiply|Divide|Modulo) r=expression                        #multiplicative         // x*y; x/y; x%y (number)
-                | l=expression  op=(Plus|Minus)             r=expression                        #additive               // x+y; x-y (number)
-                | l=expression  op=(Eq|Neq)                 r=expression                        #equality               // x=y; x!=y;
-                | l=expression  op=(Lt|Lte|Gt|Gte)          r=expression                        #comparision            // x<y; x<=y; x>y; x>=y (numbers) func(string*string->string) maybe(string) map(string->list(number))
-                | l=expression  op=(AndAlso|OrElse)         r=expression                        #logical                // x and y; x or y; isPrime and |?<100| (bool, func<T, bool>)
-                | l=expression  op=Combine                  r=expression                        #combination            // f :: g; [] :: [1] :: [2,3,4]; {"a":1, "b":2} :: {"b":0, "c":-1}; "string " :: "concatenation" (functions, lists, maps, strings)
-                | l=expression  op=Compose                  r=expression                        #functionCombination    //
-                | l=expression  op=RPipe                    r=expression                        #pipe                   // x |> func1 |> func2 |> func3 (where func has only 1 param)
+                | l=expression  op=Pow                              r=expression                #exponentiation         // x^y (number)
+                | l=expression  op=(Multiply|Divide|Modulo)         r=expression                #multiplicative         // x*y; x/y; x%y (number)
+                | l=expression  op=(Plus|Minus)                     r=expression                #additive               // x+y; x-y (number)
+                | l=expression  op=(Eq|Neq)                         r=expression                #equality               // x=y; x!=y;
+                | l=expression  op=(Lt|Lte|Gt|Gte)                  r=expression                #comparision            // x<y; x<=y; x>y; x>=y (numbers) func(string*string->string) maybe(string) map(string->list(number))
+                | l=expression  op=(AndAlso|OrElse)                 r=expression                #logical                // x and y; x or y; isPrime and |?<100| (bool, func<T, bool>)
+                | l=expression  op=Concat                           r=expression                #concatenation          // [] :: [1] :: [2,3,4]; {"a":1, "b":2} :: {"b":0, "c":-1}; "string " :: "concatenation" (lists, maps, strings)
+                | l=expression  op=(ComposeAnd|ComposeOr)           r=expression                #predicateComposition   // isEven || isPositive
+                | l=expression  op=(ComposeLeft|ComposeRight)       r=expression                #functionComposition    // f >> g, f << g
+                | l=expression  op=RPipe                            r=expression                #pipe                   // x |> func1 |> func2 |> func3 (where func has only 1 param)
                 | Pipe operators Pipe                                                           #operatorLambda         // |?+?| |?-2| |?*2| |-?|
-                | Lambda LParen lambdaParams RParen Arrow lambdaBody                            #lambda                 // \(int x)->x+1; \(int x, int y)->x+y
+                | Lambda lambdaParams Arrow lambdaBody                                          #lambda                 // \(int x)->x+1; \(x: int, y: int)->x+y
                 | If condition (Pipe condition)* Else expression                                #conditional            // if x > 0 then 'positive' | x < 0 then 'negative' else 'zero'
                 | If expression Is Pipe? match (Pipe match)* (Else expression)?                 #patternMathching       // if x match <pattern1> when ... then ... | <pattern2> when ... then ... else ...
                 ;
@@ -68,7 +69,7 @@ constant        : True
                 | Number
                 | String
                 ;
-nums            : from=Number Range ((Plus|Minus) Number Range)? to=Number                          // numeric range
+nums            : from=Number Range ((Plus|Minus) Number Range)? to=Number // numeric range
                 ;
 recordPair      : Name Colon expression
                 ;
@@ -76,7 +77,7 @@ mapItems        : mapPair (Comma mapPair)*
                 ;
 mapPair         : LBracket expression RBracket Colon expression
                 ;
-mapType         : LBracket type RBracket Colon type
+mapItemType     : LBracket type RBracket typeAnnotation
                 ;
 listItems       : expression (Comma expression)* // items for list
                 ;
@@ -84,11 +85,11 @@ member          : LBracket expression RBracket
                 | Name
                 ;
 argument        : ((Name Colon)? expression)
-                | OpenTypeParam
+                | Wildcard
                 ;
 
 // - - DECLARATIONS
-declarations    : Let declaration (Comma declaration)* Comma? In
+declarations    : Let declaration (Comma declaration)* Comma?
                 ;
 declaration     : (Name | extraction) Colon expression
                 ;
@@ -104,33 +105,35 @@ condition       : expression Then expression
 match           : pattern (When expression)? Then expression
                 ;
 pattern         : LParen capture (Comma capture)* (Comma rest)? RParen                  #tuplePattern
-                | LBrace recPairPattern (Comma recPairPattern)* (Comma rest)? RBrace    #recordPattern
+                | LBrace fieldPattern (Comma fieldPattern)* (Comma rest)? RBrace        #recordPattern
                 | LBracket capture? (Comma capture)* (Comma rest)? RBracket             #listPattern
-                | LBrace mapPairPattern? (Comma mapPairPattern)* (Comma rest)? RBrace   #mapPattern
-                | Name (LParen capture (Comma capture)* RParen)?                        #typePattern // type must implement destructor protocol
+                | LBrace keyPattern? (Comma keyPattern)* (Comma rest)? RBrace           #mapPattern
+                | (SomeCase | ResultCase | ErrorCase) capture                           #enumPattern
+                | NoneCase                                                              #nonePattern
                 | constant                                                              #constantPattern
                 ;
 capture         : Name              #variableCapture
                 | pattern           #subPatternCapture
-                | type alias?       #typeCapture
+                | typeName alias?   #typeCapture
                 ;
-mapPairPattern  : LBracket constant RBracket (Colon capture)?
+keyPattern      : LBracket constant RBracket (Colon capture)?
                 ;
-recPairPattern  : Name Colon capture
+fieldPattern    : Name Colon capture
                 ;
 rest            : Range Name
                 ;
 
 // -- LAMBDAS
-lambdaParams    : (Name (Colon type))? (Comma Name (Colon type)?)*
+lambdaParams    : Name
+                | LParen Name typeAnnotation? (Comma Name typeAnnotation?)* RParen
                 ;
 lambdaBody      : declarations? expression
                 ;
-operators       : OpenTypeParam binaryOperators expression
-                | expression binaryOperators OpenTypeParam
-                | OpenTypeParam (Colon type)? binaryOperators OpenTypeParam (Colon type)?
-                | unaryOperators OpenTypeParam
-                | OpenTypeParam Colon type Dot member
+operators       : Wildcard binaryOperators expression
+                | expression binaryOperators Wildcard
+                | Wildcard typeAnnotation? binaryOperators Wildcard typeAnnotation?
+                | unaryOperators Wildcard
+                | Wildcard typeAnnotation? Dot member
                 ;
 binaryOperators : Pow
                 | Multiply
@@ -146,15 +149,13 @@ binaryOperators : Pow
                 | Gt
                 | Lt
                 | Lte
-                | Combine
-                | Compose
+                | Concat
                 ;
 unaryOperators  : Minus
                 | Not
                 ;
 
 // - LEXER RULES (ordering is very important for ANTLR)
-
 LBracket        : '[';      // grouping
 RBracket        : ']';
 LBrace          : '{';
@@ -181,8 +182,12 @@ Gte             : '>=';
 Pipe            : '|';
 RPipe           : '|>';     // invocation and member access
 Dot             : '.';
-Combine         : '::';     // composition
-Compose         : '>>';
+Concat          : '::';     // composition
+ComposeRight    : '>>';
+ComposeLeft     : '<<';
+ComposeAnd      : '&&';
+ComposeOr       : '||';
+Inverse         : '!';
 AndAlso         : 'and';    // logical
 OrElse          : 'or';
 Not             : 'not';
@@ -210,9 +215,13 @@ MapType         : 'map';
 TaskType        : 'task';
 OptionType      : 'option';
 UnitType        : 'unit';
+SomeCase        : 'some';
+NoneCase        : 'none';
+ResultCase      : 'result';
+ErrorCase       : 'error';
 Number          : NaN | (Plus|Minus)? Infinity | NormalNumber;
 Name            : Identifier;
-OpenTypeParam   : Quiz Digit*;
+Wildcard        : Quiz Digit*;
 String          : Quote (Esc | ~['\\])* Quote;
 WS              : [ \t\n\r] -> skip;
 
