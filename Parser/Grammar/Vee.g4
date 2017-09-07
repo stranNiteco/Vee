@@ -40,16 +40,16 @@ expression
                 | op=Inverse expression                                                         #predicateInversion     // !isTrue
                 | op=(Plus|Minus) expression                                                    #unary                  // +x; -x; (number)
                 | op=TypeOf expression                                                          #typeof                 // typeof x (any)
-                | l=expression  op=Pow                              r=expression                #exponentiation         // x^y (number)
-                | l=expression  op=(Multiply|Divide|Modulo)         r=expression                #multiplicative         // x*y; x/y; x%y (number)
-                | l=expression  op=(Plus|Minus)                     r=expression                #additive               // x+y; x-y (number)
-                | l=expression  op=(Eq|Neq)                         r=expression                #equality               // x=y; x!=y;
-                | l=expression  op=(Lt|Lte|Gt|Gte)                  r=expression                #comparision            // x<y; x<=y; x>y; x>=y (numbers) func(string*string->string) maybe(string) map(string->list(number))
-                | l=expression  op=(AndAlso|OrElse)                 r=expression                #logical                // x and y; x or y; isPrime and |?<100| (bool, func<T, bool>)
-                | l=expression  op=Concat                           r=expression                #concatenation          // [] :: [1] :: [2,3,4]; {"a":1, "b":2} :: {"b":0, "c":-1}; "string " :: "concatenation" (lists, maps, strings)
-                | l=expression  op=(ComposeAnd|ComposeOr)           r=expression                #predicateComposition   // isEven || isPositive
-                | l=expression  op=(ComposeLeft|ComposeRight)       r=expression                #functionComposition    // f >> g, f << g
-                | l=expression  op=RPipe                            r=expression                #pipe                   // x |> func1 |> func2 |> func3 (where func has only 1 param)
+                | left=expression  op=Pow                         right=expression              #exponentiation         // x^y (number)
+                | left=expression  op=(Multiply|Divide|Modulo)    right=expression              #multiplicative         // x*y; x/y; x%y (number)
+                | left=expression  op=(Plus|Minus)                right=expression              #additive               // x+y; x-y (number)
+                | left=expression  op=(Eq|Neq)                    right=expression              #equality               // x=y; x!=y;
+                | left=expression  op=(Lt|Lte|Gt|Gte)             right=expression              #comparision            // x<y; x<=y; x>y; x>=y (numbers) func(string*string->string) maybe(string) map(string->list(number))
+                | left=expression  op=(AndAlso|OrElse)            right=expression              #logical                // x and y; x or y; isPrime and |?<100| (bool, func<T, bool>)
+                | left=expression  op=Concat                      right=expression              #concatenation          // [] :: [1] :: [2,3,4]; {"a":1, "b":2} :: {"b":0, "c":-1}; "string " :: "concatenation" (lists, maps, strings)
+                | left=expression  op=(ComposeAnd|ComposeOr)      right=expression              #predicateComposition   // isEven || isPositive
+                | left=expression  op=(ComposeLeft|ComposeRight)  right=expression              #functionComposition    // f >> g, f << g
+                | left=expression  op=RPipe                       right=expression              #pipe                   // x |> func1 |> func2 |> func3 (where func has only 1 param)
                 | Pipe operators Pipe                                                           #operatorLambda         // |?+?| |?-2| |?*2| |-?|
                 | Lambda lambdaParams Arrow lambdaBody                                          #lambda                 // \(int x)->x+1; \(x: int, y: int)->x+y
                 | If condition (Pipe condition)* Else expression                                #conditional            // if x > 0 then 'positive' | x < 0 then 'negative' else 'zero'
