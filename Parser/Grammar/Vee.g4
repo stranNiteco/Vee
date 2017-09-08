@@ -45,7 +45,7 @@ expression
                 | left=expression  op=(Plus|Minus)                right=expression              #additive               // x+y; x-y (number)
                 | left=expression  op=(Eq|Neq)                    right=expression              #equality               // x=y; x!=y;
                 | left=expression  op=(Lt|Lte|Gt|Gte)             right=expression              #comparision            // x<y; x<=y; x>y; x>=y (numbers) func(string*string->string) maybe(string) map(string->list(number))
-                | left=expression  op=(AndAlso|OrElse)            right=expression              #logical                // x and y; x or y; isPrime and |?<100| (bool, func<T, bool>)
+                | left=expression  op=(AndAlso|OrElse)            right=expression              #logical                // x and y; x or y;
                 | left=expression  op=Concat                      right=expression              #concatenation          // [] :: [1] :: [2,3,4]; {"a":1, "b":2} :: {"b":0, "c":-1}; "string " :: "concatenation" (lists, maps, strings)
                 | left=expression  op=(ComposeAnd|ComposeOr)      right=expression              #predicateComposition   // isEven || isPositive
                 | left=expression  op=(ComposeLeft|ComposeRight)  right=expression              #functionComposition    // f >> g, f << g
@@ -183,7 +183,7 @@ ComposeLeft     : '<<';
 ComposeAnd      : '&&';
 ComposeOr       : '||';
 Inverse         : '!';
-AndAlso         : 'and';    // logical
+AndAlso         : 'and';    // logical &&
 OrElse          : 'or';
 Not             : 'not';
 TypeOf          : 'typeof';

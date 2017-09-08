@@ -179,28 +179,27 @@ namespace Vee.Parser
 
         public override string VisitExponentiation(VeeParser.ExponentiationContext context)
             => VisitBinaryOperatorFunction(context.left, context.op, context.right);
-        public override string VisitMultiplicative(VeeParser.MultiplicativeContext context)
+           public override string VisitConcatenation(VeeParser.ConcatenationContext context)
+            => VisitBinaryOperatorFunction(context.left, context.op, context.right);
+            //TODO: create javascript function PredicateComposition
+        public override string VisitPredicateComposition(VeeParser.PredicateCompositionContext context)
+            => VisitBinaryOperatorFunction(context.left, context.op, context.right);
+            //TODO: create FunctionComposition
+        public override string VisitFunctionComposition(VeeParser.FunctionCompositionContext context)
+            => VisitBinaryOperatorFunction(context.left, context.op, context.right);
+
+        public override string VisitMultiplicative(VeeParser.MultiplicativeContext context)        
             => VisitBinaryOperator(context.left, context.op, context.right);
         public override string VisitAdditive(VeeParser.AdditiveContext context)
-            => VisitBinaryOperator(context.left, context.op, context.right);
-        
+            => VisitBinaryOperator(context.left, context.op, context.right);        
         public override string VisitEquality(VeeParser.EqualityContext context)
             => VisitBinaryOperator(context.left, context.op, context.right);
-
         public override string VisitComparision(VeeParser.ComparisionContext context)
             => VisitBinaryOperator(context.left, context.op, context.right);
-
         public override string VisitLogical(VeeParser.LogicalContext context)
             => VisitBinaryOperator(context.left, context.op, context.right);
 
-        public override string VisitConcatenation(VeeParser.ConcatenationContext context)
-            => VisitBinaryOperatorFunction(context.left, context.op, context.right);
-
-        public override string VisitPredicateComposition(VeeParser.PredicateCompositionContext context)
-            => VisitBinaryOperatorFunction(context.left, context.op, context.right);
-
-        public override string VisitFunctionComposition(VeeParser.FunctionCompositionContext context)
-            => VisitBinaryOperatorFunction(context.left, context.op, context.right);
+     
 
         public override string VisitPipe(VeeParser.PipeContext context)
         {
@@ -212,7 +211,7 @@ namespace Vee.Parser
         private string VisitUnaryOperator(IToken @operator, VeeParser.ExpressionContext expressionContext)
         {
             var expression = Visit(expressionContext);
-            var fn = LookupJsOperatorFunction(@operator.Type);
+            var fn = LookupJsOperator(@operator.Type);
             return $"{fn}({expression})";
         }
 
@@ -237,17 +236,63 @@ namespace Vee.Parser
             var leftStr = Visit(left);
             var rightStr = Visit(right);
             var op = LookupJsOperator(@operator.Type);
-            return $"{leftStr} {@operator.Text} {rightStr}";
+            return $"{leftStr} {op} {rightStr}";
         }
 
         private static string LookupJsOperatorFunction(int operatorType)
         {
             // TODO: map x^y to context.Math.pow(), etc...
-            throw new NotImplementedException();
+         switch(operatorType)
+            {
+                case VeeLexer.Pow:
+                    return "Math.pow";
+                case VeeLexer.Concat:
+                    return "String.prototype.concat.call"; 
+                //TODO: Define function ComposeAnd in javascript    
+                case VeeLexer.Inverse:
+                    return "context.Inverse";                    
+                case VeeLexer.ComposeAnd:
+                    return "context.ComposeAnd";
+                case VeeLexer.ComposeOr:
+                    return "context.ComposeOr";                             
+            }
+                return "";
         }
 
-        private static string LookupJsOperator(int operatorType) {
-            throw new NotImplementedException();
+        private static string LookupJsOperator(int operatorType)
+         {
+            switch(operatorType)
+            {
+                case VeeLexer.Plus:
+                    return "+";
+                case VeeLexer.Minus:
+                    return "-"; 
+                case VeeLexer.Multiply:
+                    return "*";
+                case VeeLexer.Divide:
+                    return "/";
+                case VeeLexer.Modulo:
+                    return "%";                                               
+                case VeeLexer.Lt:
+                    return "<";
+                case VeeLexer.Lte:
+                    return "<=";
+                case VeeLexer.Gt:
+                    return ">";
+                case VeeLexer.Gte:
+                    return ">=";
+                case VeeLexer.Eq:
+                    return "==";
+                case VeeLexer.Neq:
+                    return "!="; 
+                case VeeLexer.AndAlso:
+                    return "&&";
+                case VeeLexer.OrElse:
+                    return "||";
+                case VeeLexer.Not:
+                    return "!";
+            }
+            return "";
         }
 
         private static string GetStringContent(ITerminalNode stringNode)
