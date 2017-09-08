@@ -38,7 +38,7 @@ expression
                 | expression LParen argument? (Comma argument)* RParen                          #invocation             // f(x); g(x,y) (func)
 /*operations*/  | op=Not expression                                                             #logicalNot             // not x, not isPrime (boolean,  func<.. bool>)
                 | op=Inverse expression                                                         #predicateInversion     // !isTrue
-                | op=(Plus|Minus) expression                                                    #unary                  // +x; -x; (number)
+                | op=Minus expression                                                           #negation               // -x; (number)
                 //| op=TypeOf expression                                                          #typeof                 // typeof x (any)
                 | left=expression  op=Pow                         right=expression              #exponentiation         // x^y (number)
                 | left=expression  op=(Multiply|Divide|Modulo)    right=expression              #multiplicative         // x*y; x/y; x%y (number)
@@ -51,8 +51,8 @@ expression
                 | left=expression  op=(ComposeLeft|ComposeRight)  right=expression              #functionComposition    // f >> g, f << g
                 | left=expression  op=RPipe                       right=expression              #pipe                   // x |> func1 |> func2 |> func3 (where func has only 1 param)
                 | Pipe operators Pipe                                                           #operatorLambda         // |?+?| |?-2| |?*2| |-?|
-                | Lambda lambdaParams Arrow lambdaBody                                          #lambda                 // \(int x)->x+1; \(x: int, y: int)->x+y
-                | If condition (Pipe condition)* Else expression                                #conditional            // if x > 0 then 'positive' | x < 0 then 'negative' else 'zero'
+                | Lambda params=lambdaParams Arrow body=lambdaBody                              #lambda                 // \(int x)->x+1; \(x: int, y: int)->x+y
+                | If condition (Pipe condition)* Else else=expression                           #conditional            // if x > 0 then 'positive' | x < 0 then 'negative' else 'zero'
                 | If expression Is Pipe? match (Pipe match)* (Else expression)?                 #patternMathching       // if x match <pattern1> when ... then ... | <pattern2> when ... then ... else ...
                 ;
 
@@ -62,7 +62,7 @@ constant        : True
                 | Number
                 | String
                 ;
-range           : from=Number Range (sign=(Plus|Minus) incr=Number Range)? to=Number // numeric range
+range           : from=Number Range (incr=Number Range)? to=Number // numeric range
                 ;
 recordPair      : field=Name Colon value=expression
                 ;
@@ -119,10 +119,10 @@ rest            : Range Name
                 ;
 
 // -- LAMBDAS
-lambdaParams    : Name
-                | LParen Name typeAnnotation? (Comma Name typeAnnotation?)* RParen
+lambdaParams    : Name                                                                  #singleLambdaParam
+                | LParen Name typeAnnotation? (Comma Name typeAnnotation?)* RParen      #multipleLambdaParams
                 ;
-lambdaBody      : declarations? expression
+lambdaBody      : (declarations In)? expression
                 ;
 operators       : left=Wildcard binaryOperators right=expression                                #leftOperator
                 | left=expression binaryOperators right=Wildcard                                #rightOperator
@@ -205,6 +205,7 @@ BooleanType     : 'boolean';
 EnumType        : 'enum';
 TupleType       : 'tuple';
 RecordType      : 'record';
+FunctionType    : 'function';
 ListType        : 'list';
 MapType         : 'map';
 TaskType        : 'task';
@@ -214,9 +215,9 @@ SomeCase        : 'some';
 NoneCase        : 'none';
 ResultCase      : 'result';
 ErrorCase       : 'error';
-Number          : NaN | (Plus|Minus)? Infinity | NormalNumber;
+Number          : NaN | (Plus|Minus)? Infinity | (Plus|Minus)? NormalNumber;
 Name            : Identifier;
-Wildcard        : Quiz Name?;
+Wildcard        : Quiz Name;
 String          : Quote (Esc | ~['\\])* Quote;
 WS              : [ \t\n\r] -> skip;
 

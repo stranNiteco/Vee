@@ -114,6 +114,13 @@ public interface IVeeVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitPatternMathching([NotNull] VeeParser.PatternMathchingContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>negation</c>
+	/// labeled alternative in <see cref="VeeParser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitNegation([NotNull] VeeParser.NegationContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>access</c>
 	/// labeled alternative in <see cref="VeeParser.expression"/>.
 	/// </summary>
@@ -127,13 +134,6 @@ public interface IVeeVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitConditional([NotNull] VeeParser.ConditionalContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>unary</c>
-	/// labeled alternative in <see cref="VeeParser.expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitUnary([NotNull] VeeParser.UnaryContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>multiplicative</c>
 	/// labeled alternative in <see cref="VeeParser.expression"/>.
@@ -325,11 +325,19 @@ public interface IVeeVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitListItems([NotNull] VeeParser.ListItemsContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="VeeParser.member"/>.
+	/// Visit a parse tree produced by the <c>indexMember</c>
+	/// labeled alternative in <see cref="VeeParser.member"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitMember([NotNull] VeeParser.MemberContext context);
+	Result VisitIndexMember([NotNull] VeeParser.IndexMemberContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>fieldMember</c>
+	/// labeled alternative in <see cref="VeeParser.member"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFieldMember([NotNull] VeeParser.FieldMemberContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="VeeParser.argument"/>.
 	/// </summary>
@@ -469,11 +477,19 @@ public interface IVeeVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitRest([NotNull] VeeParser.RestContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="VeeParser.lambdaParams"/>.
+	/// Visit a parse tree produced by the <c>singleLambdaParam</c>
+	/// labeled alternative in <see cref="VeeParser.lambdaParams"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitLambdaParams([NotNull] VeeParser.LambdaParamsContext context);
+	Result VisitSingleLambdaParam([NotNull] VeeParser.SingleLambdaParamContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>multipleLambdaParams</c>
+	/// labeled alternative in <see cref="VeeParser.lambdaParams"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitMultipleLambdaParams([NotNull] VeeParser.MultipleLambdaParamsContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="VeeParser.lambdaBody"/>.
 	/// </summary>
@@ -481,11 +497,40 @@ public interface IVeeVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitLambdaBody([NotNull] VeeParser.LambdaBodyContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="VeeParser.operators"/>.
+	/// Visit a parse tree produced by the <c>leftOperator</c>
+	/// labeled alternative in <see cref="VeeParser.operators"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitOperators([NotNull] VeeParser.OperatorsContext context);
+	Result VisitLeftOperator([NotNull] VeeParser.LeftOperatorContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>rightOperator</c>
+	/// labeled alternative in <see cref="VeeParser.operators"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitRightOperator([NotNull] VeeParser.RightOperatorContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>leftRightOperator</c>
+	/// labeled alternative in <see cref="VeeParser.operators"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLeftRightOperator([NotNull] VeeParser.LeftRightOperatorContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>rightUnaryOperator</c>
+	/// labeled alternative in <see cref="VeeParser.operators"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitRightUnaryOperator([NotNull] VeeParser.RightUnaryOperatorContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>memberOperator</c>
+	/// labeled alternative in <see cref="VeeParser.operators"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitMemberOperator([NotNull] VeeParser.MemberOperatorContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="VeeParser.binaryOperators"/>.
 	/// </summary>
