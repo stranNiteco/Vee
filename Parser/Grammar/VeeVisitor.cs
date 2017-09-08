@@ -212,13 +212,6 @@ public interface IVeeVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitEquality([NotNull] VeeParser.EqualityContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>typeof</c>
-	/// labeled alternative in <see cref="VeeParser.expression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitTypeof([NotNull] VeeParser.TypeofContext context);
-	/// <summary>
 	/// Visit a parse tree produced by the <c>logicalNot</c>
 	/// labeled alternative in <see cref="VeeParser.expression"/>.
 	/// </summary>
@@ -302,11 +295,11 @@ public interface IVeeVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitConstant([NotNull] VeeParser.ConstantContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="VeeParser.nums"/>.
+	/// Visit a parse tree produced by <see cref="VeeParser.range"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitNums([NotNull] VeeParser.NumsContext context);
+	Result VisitRange([NotNull] VeeParser.RangeContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="VeeParser.recordPair"/>.
 	/// </summary>
@@ -325,12 +318,6 @@ public interface IVeeVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitMapPair([NotNull] VeeParser.MapPairContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="VeeParser.mapItemType"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitMapItemType([NotNull] VeeParser.MapItemTypeContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="VeeParser.listItems"/>.
 	/// </summary>

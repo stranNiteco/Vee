@@ -553,10 +553,6 @@ in List.filter(isLeapYear, years)
     </tbody>
 </table>
 
-### Type Instropection `typeof`
-
-Returns the name type of the expression on the right as a string `typeof x`
-
 ### Invocation `f(x)` and pipe `x |> f`
 
 ```

@@ -31,15 +31,15 @@ expression
                 | Name                                                                          #variable               // x; x1; _; $; _x; $x
                 | LParen expression (Comma expression)+ RParen                                  #tuple                  // (x,y)
                 | LBrace recordPair (Comma recordPair)* RBrace                                  #record                 // { key: value }
-                | LBrace (mapItems | mapItemType|) RBrace                                       #map                    // { [1]:2, ['key']:value }
-                | LBracket (nums|listItems|type|) RBracket                                      #list                   // [x,y,z]; [0..100]; [-1..-2..-100];
+                | LBrace (mapItems/* | mapItemType*/)? RBrace                                   #map                    // { [1]:2, ['key']:value }
+                | LBracket (range|listItems/*|type*/)? RBracket                                 #list                   // [x,y,z]; [0..100]; [-1..-2..-100];
 /*grouping*/    | LParen expression RParen                                                      #grouping               // (x+y) (any)
 /*invocation*/  | expression Dot member                                                         #access                 // x.y, a.b.c.d (object...) x.[1], x.["key"], x.[1].[2], x.["y"].["z"] (list|map|record)
                 | expression LParen argument? (Comma argument)* RParen                          #invocation             // f(x); g(x,y) (func)
 /*operations*/  | op=Not expression                                                             #logicalNot             // not x, not isPrime (boolean,  func<.. bool>)
                 | op=Inverse expression                                                         #predicateInversion     // !isTrue
                 | op=(Plus|Minus) expression                                                    #unary                  // +x; -x; (number)
-                | op=TypeOf expression                                                          #typeof                 // typeof x (any)
+                //| op=TypeOf expression                                                          #typeof                 // typeof x (any)
                 | left=expression  op=Pow                         right=expression              #exponentiation         // x^y (number)
                 | left=expression  op=(Multiply|Divide|Modulo)    right=expression              #multiplicative         // x*y; x/y; x%y (number)
                 | left=expression  op=(Plus|Minus)                right=expression              #additive               // x+y; x-y (number)
@@ -62,16 +62,18 @@ constant        : True
                 | Number
                 | String
                 ;
-nums            : from=Number Range ((Plus|Minus) Number Range)? to=Number // numeric range
+range           : from=Number Range (sign=(Plus|Minus) incr=Number Range)? to=Number // numeric range
                 ;
 recordPair      : Name Colon expression
                 ;
 mapItems        : mapPair (Comma mapPair)*
                 ;
-mapPair         : LBracket expression RBracket Colon expression
+mapPair         : LBracket key=expression RBracket Colon value=expression
                 ;
+/*
 mapItemType     : LBracket type RBracket typeAnnotation
                 ;
+*/
 listItems       : expression (Comma expression)* // items for list
                 ;
 member          : LBracket expression RBracket
@@ -214,7 +216,7 @@ ResultCase      : 'result';
 ErrorCase       : 'error';
 Number          : NaN | (Plus|Minus)? Infinity | NormalNumber;
 Name            : Identifier;
-Wildcard        : Quiz Digit*;
+Wildcard        : Quiz Name?;
 String          : Quote (Esc | ~['\\])* Quote;
 WS              : [ \t\n\r] -> skip;
 
