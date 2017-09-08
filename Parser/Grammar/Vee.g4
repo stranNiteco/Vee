@@ -64,7 +64,7 @@ constant        : True
                 ;
 range           : from=Number Range (sign=(Plus|Minus) incr=Number Range)? to=Number // numeric range
                 ;
-recordPair      : Name Colon expression
+recordPair      : field=Name Colon value=expression
                 ;
 mapItems        : mapPair (Comma mapPair)*
                 ;
@@ -76,8 +76,8 @@ mapItemType     : LBracket type RBracket typeAnnotation
 */
 listItems       : expression (Comma expression)* // items for list
                 ;
-member          : LBracket expression RBracket
-                | Name
+member          : LBracket expression RBracket  #indexMember
+                | Name                          #fieldMember
                 ;
 argument        : ((Name Colon)? expression)
                 | Wildcard
@@ -95,7 +95,7 @@ alias           : As Name
                 ;
 
 // - - CONDITIONALS and PATTERN MATCHING
-condition       : expression Then expression
+condition       : if=expression Then then=expression
                 ;
 match           : pattern (When expression)? Then expression
                 ;
@@ -124,11 +124,11 @@ lambdaParams    : Name
                 ;
 lambdaBody      : declarations? expression
                 ;
-operators       : Wildcard binaryOperators expression
-                | expression binaryOperators Wildcard
-                | Wildcard typeAnnotation? binaryOperators Wildcard typeAnnotation?
-                | unaryOperators Wildcard
-                | Wildcard typeAnnotation? Dot member
+operators       : left=Wildcard binaryOperators right=expression                                #leftOperator
+                | left=expression binaryOperators right=Wildcard                                #rightOperator
+                | left=Wildcard typeAnnotation? binaryOperators right=Wildcard typeAnnotation?  #leftRightOperator
+                | unaryOperators right=Wildcard                                                 #rightUnaryOperator
+                | left=Wildcard typeAnnotation? Dot member                                      #memberOperator
                 ;
 binaryOperators : Pow
                 | Multiply
