@@ -135,6 +135,27 @@ namespace Vee.Parser
             return $"({parameters} => {{ {declarationStrs}return {body} }})";
         }
 
+        public override string VisitMemberLambda([NotNull] VeeParser.MemberLambdaContext context)
+        {
+            var memberStr = Visit(context.member());
+            return $"(x => x{memberStr})";
+        }
+
+        public override string VisitUnaryLambda([NotNull] VeeParser.UnaryLambdaContext context)
+        {
+            var op = LookupJsOperator(context.op.Type);
+            return $"(x => {op}x)";
+        }
+
+        public override string VisitLeftBinaryLambda([NotNull] VeeParser.LeftBinaryLambdaContext context)
+        {
+            var left = context.left.Text.TrimStart('?');
+            var right = Visit(context.right);
+            //var opType = VeeLexer.DefaultVocabulary.lambdaOperators().GetText()
+
+            return VisitBinaryOperator(left, op.Text, right, op.Type);
+        }
+
         public override string VisitDeclarations([NotNull] VeeParser.DeclarationsContext context)
         {
             var declarations = context.declaration();
@@ -298,6 +319,7 @@ namespace Vee.Parser
             }
             return result;
         }
+
         public override string VisitLogicalNot(VeeParser.LogicalNotContext context)
             => VisitUnaryOperator(context.op, context.expression());
 
@@ -308,15 +330,15 @@ namespace Vee.Parser
             => VisitUnaryOperatorFunction(context.op, context.expression());
 
         public override string VisitExponentiation(VeeParser.ExponentiationContext context)
-            => VisitBinaryOperatorFunction(context.left, context.op, context.right);
+            => VisitBinaryOperator(context.left, context.op, context.right);
         public override string VisitConcatenation(VeeParser.ConcatenationContext context)
-         => VisitBinaryOperatorFunction(context.left, context.op, context.right);
+         => VisitBinaryOperator(context.left, context.op, context.right);
         //TODO: create javascript function PredicateComposition
         public override string VisitPredicateComposition(VeeParser.PredicateCompositionContext context)
-            => VisitBinaryOperatorFunction(context.left, context.op, context.right);
+            => VisitBinaryOperator(context.left, context.op, context.right);
         //TODO: create FunctionComposition
         public override string VisitFunctionComposition(VeeParser.FunctionCompositionContext context)
-            => VisitBinaryOperatorFunction(context.left, context.op, context.right);
+            => VisitBinaryOperator(context.left, context.op, context.right);
 
         public override string VisitMultiplicative(VeeParser.MultiplicativeContext context)
             => VisitBinaryOperator(context.left, context.op, context.right);
@@ -350,32 +372,34 @@ namespace Vee.Parser
             return $"{fn}({expression})";
         }
 
-        private string VisitBinaryOperatorFunction(VeeParser.ExpressionContext left, IToken @operator, VeeParser.ExpressionContext right)
-        {
-            var leftStr = Visit(left);
-            var rightStr = Visit(right);
+        private string VisitBinaryOperator(VeeParser.ExpressionContext left, IToken @operator, VeeParser.ExpressionContext right) => VisitBinaryOperator(Visit(left), @operator.Text, Visit(right), @operator.Type);
 
-            var fn = LookupJsOperatorFunction(@operator.Type);
-            return $"{fn}({leftStr}, {rightStr})";
-        }
-
-        private string VisitBinaryOperator(VeeParser.ExpressionContext left, IToken @operator, VeeParser.ExpressionContext right)
+        private static string VisitBinaryOperator(string left, string op, string right, int opType)
         {
-            var leftStr = Visit(left);
-            var rightStr = Visit(right);
-            var op = LookupJsOperator(@operator.Type);
-            return $"{leftStr} {op} {rightStr}";
+            string fnOp, binOp;
+            if (!string.IsNullOrWhiteSpace(fnOp = LookupJsOperatorFunction(opType)))
+            {
+                return $"{fnOp}({left}, {right})";
+            }
+            else if (!string.IsNullOrWhiteSpace(binOp = LookupJsOperator(opType)))
+            {
+                return $"{left} {binOp} {right}";
+            }
+            else
+            {
+                throw new NotSupportedException($"Operator type not found: {left} {op} {right} ({opType})");
+            }
         }
 
         private static string LookupJsOperatorFunction(int operatorType)
         {
+            //TODO: Define functions in JS runtime 
             switch (operatorType)
             {
                 case VeeLexer.Pow:
                     return "this.function.pow";
                 case VeeLexer.Concat:
                     return "this.function.concat";
-                //TODO: Define function ComposeAnd in javascript    
                 case VeeLexer.Inverse:
                     return "this.function.inverse";
                 case VeeLexer.ComposeAnd:
@@ -424,7 +448,7 @@ namespace Vee.Parser
 
         private static string GetStringContent(ITerminalNode stringNode)
         {
-            // TODO: replace escape, 
+            // TODO: replace escape, interpolations...
             return stringNode.Symbol.Text;
         }
     }

@@ -124,13 +124,13 @@ lambdaParams    : Name                                                          
                 ;
 lambdaBody      : (declarations In)? expression
                 ;
-operators       : left=Wildcard binaryOperators right=expression                                #leftOperator
-                | left=expression binaryOperators right=Wildcard                                #rightOperator
-                | left=Wildcard typeAnnotation? binaryOperators right=Wildcard typeAnnotation?  #leftRightOperator
-                | unaryOperators right=Wildcard                                                 #rightUnaryOperator
-                | left=Wildcard typeAnnotation? Dot member                                      #memberOperator
+operators       : left=Wildcard op=lambdaOperators right=expression                                 #leftBinaryLambda
+                | left=expression op=lambdaOperators right=Wildcard                                 #rightBinaryLambda
+                | left=Wildcard typeAnnotation? op=lambdaOperators right=Wildcard typeAnnotation?   #binaryLambda
+                | op=(Minus|Not) right=Wildcard                                                     #unaryLambda
+                | left=Wildcard typeAnnotation? Dot member                                          #memberLambda
                 ;
-binaryOperators : Pow
+lambdaOperators : Pow
                 | Multiply
                 | Divide
                 | Modulo
@@ -145,9 +145,6 @@ binaryOperators : Pow
                 | Lt
                 | Lte
                 | Concat
-                ;
-unaryOperators  : Minus
-                | Not
                 ;
 
 // - LEXER RULES (ordering is very important for ANTLR)
