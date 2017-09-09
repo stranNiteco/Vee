@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Demo.ViewModel;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using Vee.Parser;
 
 namespace Demo.Controllers
@@ -10,7 +12,7 @@ namespace Demo.Controllers
         public IActionResult Translate([FromBody] string input) 
         {
             var result = JavascriptTransformer.Transform(input);
-            return Ok(result);
-        }
+            return Ok(new ParserResult() {CompiledString = result, Variables = new List<string>() { "a","b"} });
+        }        
     }
 }
