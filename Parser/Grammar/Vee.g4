@@ -38,21 +38,21 @@ expression
                 | expression LParen argument? (Comma argument)* RParen                          #invocation             // f(x); g(x,y) (func)
 /*operations*/  | op=Not expression                                                             #logicalNot             // not x, not isPrime (boolean,  func<.. bool>)
                 | op=Inverse expression                                                         #predicateInversion     // !isTrue
-                | op=(Plus|Minus) expression                                                    #unary                  // +x; -x; (number)
+                | op=Minus expression                                                           #negation               // -x; (number)
                 //| op=TypeOf expression                                                          #typeof                 // typeof x (any)
                 | left=expression  op=Pow                         right=expression              #exponentiation         // x^y (number)
                 | left=expression  op=(Multiply|Divide|Modulo)    right=expression              #multiplicative         // x*y; x/y; x%y (number)
                 | left=expression  op=(Plus|Minus)                right=expression              #additive               // x+y; x-y (number)
                 | left=expression  op=(Eq|Neq)                    right=expression              #equality               // x=y; x!=y;
                 | left=expression  op=(Lt|Lte|Gt|Gte)             right=expression              #comparision            // x<y; x<=y; x>y; x>=y (numbers) func(string*string->string) maybe(string) map(string->list(number))
-                | left=expression  op=(AndAlso|OrElse)            right=expression              #logical                // x and y; x or y; isPrime and |?<100| (bool, func<T, bool>)
+                | left=expression  op=(AndAlso|OrElse)            right=expression              #logical                // x and y; x or y;
                 | left=expression  op=Concat                      right=expression              #concatenation          // [] :: [1] :: [2,3,4]; {"a":1, "b":2} :: {"b":0, "c":-1}; "string " :: "concatenation" (lists, maps, strings)
                 | left=expression  op=(ComposeAnd|ComposeOr)      right=expression              #predicateComposition   // isEven || isPositive
                 | left=expression  op=(ComposeLeft|ComposeRight)  right=expression              #functionComposition    // f >> g, f << g
                 | left=expression  op=RPipe                       right=expression              #pipe                   // x |> func1 |> func2 |> func3 (where func has only 1 param)
                 | Pipe operators Pipe                                                           #operatorLambda         // |?+?| |?-2| |?*2| |-?|
-                | Lambda lambdaParams Arrow lambdaBody                                          #lambda                 // \(int x)->x+1; \(x: int, y: int)->x+y
-                | If condition (Pipe condition)* Else expression                                #conditional            // if x > 0 then 'positive' | x < 0 then 'negative' else 'zero'
+                | Lambda params=lambdaParams Arrow body=lambdaBody                              #lambda                 // \(int x)->x+1; \(x: int, y: int)->x+y
+                | If condition (Pipe condition)* Else else=expression                           #conditional            // if x > 0 then 'positive' | x < 0 then 'negative' else 'zero'
                 | If expression Is Pipe? match (Pipe match)* (Else expression)?                 #patternMathching       // if x match <pattern1> when ... then ... | <pattern2> when ... then ... else ...
                 ;
 
@@ -62,9 +62,9 @@ constant        : True
                 | Number
                 | String
                 ;
-range           : from=Number Range (sign=(Plus|Minus) incr=Number Range)? to=Number // numeric range
+range           : from=Number Range (incr=Number Range)? to=Number // numeric range
                 ;
-recordPair      : Name Colon expression
+recordPair      : field=Name Colon value=expression
                 ;
 mapItems        : mapPair (Comma mapPair)*
                 ;
@@ -76,8 +76,8 @@ mapItemType     : LBracket type RBracket typeAnnotation
 */
 listItems       : expression (Comma expression)* // items for list
                 ;
-member          : LBracket expression RBracket
-                | Name
+member          : LBracket expression RBracket  #indexMember
+                | Name                          #fieldMember
                 ;
 argument        : ((Name Colon)? expression)
                 | Wildcard
@@ -95,7 +95,7 @@ alias           : As Name
                 ;
 
 // - - CONDITIONALS and PATTERN MATCHING
-condition       : expression Then expression
+condition       : if=expression Then then=expression
                 ;
 match           : pattern (When expression)? Then expression
                 ;
@@ -119,16 +119,16 @@ rest            : Range Name
                 ;
 
 // -- LAMBDAS
-lambdaParams    : Name
-                | LParen Name typeAnnotation? (Comma Name typeAnnotation?)* RParen
+lambdaParams    : Name                                                                  #singleLambdaParam
+                | LParen Name typeAnnotation? (Comma Name typeAnnotation?)* RParen      #multipleLambdaParams
                 ;
-lambdaBody      : declarations? expression
+lambdaBody      : (declarations In)? expression
                 ;
-operators       : Wildcard binaryOperators expression
-                | expression binaryOperators Wildcard
-                | Wildcard typeAnnotation? binaryOperators Wildcard typeAnnotation?
-                | unaryOperators Wildcard
-                | Wildcard typeAnnotation? Dot member
+operators       : left=Wildcard binaryOperators right=expression                                #leftOperator
+                | left=expression binaryOperators right=Wildcard                                #rightOperator
+                | left=Wildcard typeAnnotation? binaryOperators right=Wildcard typeAnnotation?  #leftRightOperator
+                | unaryOperators right=Wildcard                                                 #rightUnaryOperator
+                | left=Wildcard typeAnnotation? Dot member                                      #memberOperator
                 ;
 binaryOperators : Pow
                 | Multiply
@@ -183,7 +183,7 @@ ComposeLeft     : '<<';
 ComposeAnd      : '&&';
 ComposeOr       : '||';
 Inverse         : '!';
-AndAlso         : 'and';    // logical
+AndAlso         : 'and';    // logical &&
 OrElse          : 'or';
 Not             : 'not';
 TypeOf          : 'typeof';
@@ -205,6 +205,7 @@ BooleanType     : 'boolean';
 EnumType        : 'enum';
 TupleType       : 'tuple';
 RecordType      : 'record';
+FunctionType    : 'function';
 ListType        : 'list';
 MapType         : 'map';
 TaskType        : 'task';
@@ -214,9 +215,9 @@ SomeCase        : 'some';
 NoneCase        : 'none';
 ResultCase      : 'result';
 ErrorCase       : 'error';
-Number          : NaN | (Plus|Minus)? Infinity | NormalNumber;
+Number          : NaN | (Plus|Minus)? Infinity | (Plus|Minus)? NormalNumber;
 Name            : Identifier;
-Wildcard        : Quiz Name?;
+Wildcard        : Quiz Name;
 String          : Quote (Esc | ~['\\])* Quote;
 WS              : [ \t\n\r] -> skip;
 

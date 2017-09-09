@@ -164,6 +164,17 @@ public partial class VeeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, 
 	/// <return>The visitor result.</return>
 	public virtual Result VisitPatternMathching([NotNull] VeeParser.PatternMathchingContext context) { return VisitChildren(context); }
 	/// <summary>
+	/// Visit a parse tree produced by the <c>negation</c>
+	/// labeled alternative in <see cref="VeeParser.expression"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitNegation([NotNull] VeeParser.NegationContext context) { return VisitChildren(context); }
+	/// <summary>
 	/// Visit a parse tree produced by the <c>access</c>
 	/// labeled alternative in <see cref="VeeParser.expression"/>.
 	/// <para>
@@ -185,17 +196,6 @@ public partial class VeeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, 
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	public virtual Result VisitConditional([NotNull] VeeParser.ConditionalContext context) { return VisitChildren(context); }
-	/// <summary>
-	/// Visit a parse tree produced by the <c>unary</c>
-	/// labeled alternative in <see cref="VeeParser.expression"/>.
-	/// <para>
-	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
-	/// on <paramref name="context"/>.
-	/// </para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	public virtual Result VisitUnary([NotNull] VeeParser.UnaryContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by the <c>multiplicative</c>
 	/// labeled alternative in <see cref="VeeParser.expression"/>.
@@ -499,7 +499,8 @@ public partial class VeeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, 
 	/// <return>The visitor result.</return>
 	public virtual Result VisitListItems([NotNull] VeeParser.ListItemsContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="VeeParser.member"/>.
+	/// Visit a parse tree produced by the <c>indexMember</c>
+	/// labeled alternative in <see cref="VeeParser.member"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -507,7 +508,18 @@ public partial class VeeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, 
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitMember([NotNull] VeeParser.MemberContext context) { return VisitChildren(context); }
+	public virtual Result VisitIndexMember([NotNull] VeeParser.IndexMemberContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>fieldMember</c>
+	/// labeled alternative in <see cref="VeeParser.member"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitFieldMember([NotNull] VeeParser.FieldMemberContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="VeeParser.argument"/>.
 	/// <para>
@@ -731,7 +743,8 @@ public partial class VeeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, 
 	/// <return>The visitor result.</return>
 	public virtual Result VisitRest([NotNull] VeeParser.RestContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="VeeParser.lambdaParams"/>.
+	/// Visit a parse tree produced by the <c>singleLambdaParam</c>
+	/// labeled alternative in <see cref="VeeParser.lambdaParams"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -739,7 +752,18 @@ public partial class VeeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, 
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitLambdaParams([NotNull] VeeParser.LambdaParamsContext context) { return VisitChildren(context); }
+	public virtual Result VisitSingleLambdaParam([NotNull] VeeParser.SingleLambdaParamContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>multipleLambdaParams</c>
+	/// labeled alternative in <see cref="VeeParser.lambdaParams"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitMultipleLambdaParams([NotNull] VeeParser.MultipleLambdaParamsContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="VeeParser.lambdaBody"/>.
 	/// <para>
@@ -751,7 +775,8 @@ public partial class VeeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, 
 	/// <return>The visitor result.</return>
 	public virtual Result VisitLambdaBody([NotNull] VeeParser.LambdaBodyContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="VeeParser.operators"/>.
+	/// Visit a parse tree produced by the <c>leftOperator</c>
+	/// labeled alternative in <see cref="VeeParser.operators"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -759,7 +784,51 @@ public partial class VeeBaseVisitor<Result> : AbstractParseTreeVisitor<Result>, 
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitOperators([NotNull] VeeParser.OperatorsContext context) { return VisitChildren(context); }
+	public virtual Result VisitLeftOperator([NotNull] VeeParser.LeftOperatorContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>rightOperator</c>
+	/// labeled alternative in <see cref="VeeParser.operators"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitRightOperator([NotNull] VeeParser.RightOperatorContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>leftRightOperator</c>
+	/// labeled alternative in <see cref="VeeParser.operators"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitLeftRightOperator([NotNull] VeeParser.LeftRightOperatorContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>rightUnaryOperator</c>
+	/// labeled alternative in <see cref="VeeParser.operators"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitRightUnaryOperator([NotNull] VeeParser.RightUnaryOperatorContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by the <c>memberOperator</c>
+	/// labeled alternative in <see cref="VeeParser.operators"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitMemberOperator([NotNull] VeeParser.MemberOperatorContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="VeeParser.binaryOperators"/>.
 	/// <para>
