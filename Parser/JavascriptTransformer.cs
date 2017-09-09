@@ -465,8 +465,12 @@ namespace Vee.Parser
                     return "this.function.composeAnd";
                 case VeeLexer.ComposeOr:
                     return "this.function.composeOr";
+                case VeeLexer.ComposeLeft:
+                    return "this.function.composeLeft";
+                case VeeLexer.ComposeRight:
+                    return "this.function.composeRight";
             }
-            return "";
+            return "";        
         }
 
         private static string LookupJsOperator(int operatorType)

@@ -39,7 +39,6 @@ expression
 /*operations*/  | op=Not expression                                                             #logicalNot             // not x, not isPrime (boolean,  func<.. bool>)
                 | op=Inverse expression                                                         #predicateInversion     // !isTrue
                 | op=Minus expression                                                           #negation               // -x; (number)
-                //| op=TypeOf expression                                                          #typeof                 // typeof x (any)
                 | left=expression  op=Pow                         right=expression              #exponentiation         // x^y (number)
                 | left=expression  op=(Multiply|Divide|Modulo)    right=expression              #multiplicative         // x*y; x/y; x%y (number)
                 | left=expression  op=(Plus|Minus)                right=expression              #additive               // x+y; x-y (number)
@@ -53,7 +52,7 @@ expression
                 | Pipe operators Pipe                                                           #operatorLambda         // |?+?| |?-2| |?*2| |-?|
                 | Lambda params=lambdaParams Arrow body=lambdaBody                              #lambda                 // \(int x)->x+1; \(x: int, y: int)->x+y
                 | If condition (Pipe condition)* Else else=expression                           #conditional            // if x > 0 then 'positive' | x < 0 then 'negative' else 'zero'
-                | If expression Is Pipe? match (Pipe match)* (Else expression)?                 #patternMathching       // if x match <pattern1> when ... then ... | <pattern2> when ... then ... else ...
+                | If expression Is Pipe? match (Pipe match)* (Else else=expression)?            #patternMathching       // if x match <pattern1> when ... then ... | <pattern2> when ... then ... else ...
                 ;
 
 // -- LITERALS

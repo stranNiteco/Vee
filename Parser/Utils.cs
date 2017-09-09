@@ -22,6 +22,5 @@ namespace Parser
         }
 
         public static string Join(this IEnumerable<string> items, string separator = ", ") => string.Join(separator, items);
-
     }
 }
