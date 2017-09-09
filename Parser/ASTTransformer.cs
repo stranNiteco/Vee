@@ -6,6 +6,7 @@ using Vee.Parser.Grammar;
 using Antlr4.Runtime.Tree;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
+using Parser;
 
 namespace Vee.Parser
 {
@@ -120,8 +121,18 @@ namespace Vee.Parser
 
         public override Node VisitVariable([NotNull] VeeParser.VariableContext context)
         {
-            //TODO: free vs bounded variable
-            return new Node(context.Name().Symbol.Text, NodeType.Variable);
+            var variableName = context.Name().Symbol.Text;
+            if (context.Parents().Any(x => (x is VeeParser.LambdaContext lambda && (ParserUtils.IsDefinedLambdaParam(lambda, variableName) || ParserUtils.IsDefinedDeclaration(lambda.body.declarations(), variableName))) ||
+                (x is VeeParser.RootContext root && ParserUtils.IsDefinedDeclaration(root.declarations(), variableName))
+            ))
+            {
+                return new Node(variableName, NodeType.BoundedVariable);
+            }
+            else
+            {
+                return new Node(variableName, NodeType.Variable);
+            }
+            
         }
 
         public override Node VisitTuple([NotNull] VeeParser.TupleContext context)

@@ -75,8 +75,8 @@ namespace Vee.Parser
             // - declaration statements in lambda
             // - declaration statements in root
             // - capture variable in a pattern matching context
-            if (context.Parents().Any(x => (x is VeeParser.LambdaContext lambda && (IsDefinedLambdaParam(lambda, variableName) || IsDefinedDeclaration(lambda.body.declarations(), variableName))) ||
-                (x is VeeParser.RootContext root && IsDefinedDeclaration(root.declarations(), variableName))
+            if (context.Parents().Any(x => (x is VeeParser.LambdaContext lambda && (ParserUtils.IsDefinedLambdaParam(lambda, variableName) || ParserUtils.IsDefinedDeclaration(lambda.body.declarations(), variableName))) ||
+                (x is VeeParser.RootContext root && ParserUtils.IsDefinedDeclaration(root.declarations(), variableName))
             )) 
             {
                 return variableName;
@@ -84,36 +84,6 @@ namespace Vee.Parser
             else
             {
                 return $"{ContextName}.{variableName}";
-            }
-        }
-
-        private bool IsDefinedDeclaration(VeeParser.DeclarationsContext declarations, string variableName)
-        {
-            if (declarations == null)
-            {
-                return false;
-            }
-            else
-            {
-                var declaredNames = declarations.declaration().Where(d => d.Name() != null).Select(d => d.Name().Symbol.Text);
-                return declaredNames.Contains(variableName);
-            }
-        }
-
-        private bool IsDefinedLambdaParam(VeeParser.LambdaContext lambda, string variableName)
-        {
-            var lambdaParams = lambda.@params;
-            if (lambdaParams is VeeParser.SingleLambdaParamContext singleParam)
-            {
-                return singleParam.Name().Symbol.Text == variableName;
-            }
-            else if (lambdaParams is VeeParser.MultipleLambdaParamsContext multipleParams)
-            {
-                return multipleParams.Name().Any(n => n.Symbol.Text == variableName);
-            }
-            else
-            {
-                return false;
             }
         }
 
