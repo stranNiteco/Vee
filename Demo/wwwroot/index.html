@@ -1,20 +1,20 @@
 <html>
-    <head>
+<head>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    
+
     <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    
+
     <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    </head>
-    <body>
+</head>
+<body>
     <div class="container-fluid">
-      <div class="jumbotron">
-        <h1>Vee Demo</h1>      
-        <p>#Team 2</p>
-      </div>
+        <div class="jumbotron">
+            <h1>Vee Demo</h1>
+            <p>#Team 2</p>
+        </div>
     </div>
     <section class="container-fluid">
         <div class="form-group">
@@ -23,8 +23,9 @@
         </div>
         <div class="form-group">
             <button type="button" class="btn btn-default" id="btnExecute">Compile</button>
+            <button type="button" class="btn btn-default" id="btnExecuteTest">Execute</button>
         </div>
-        
+
         <div class="form-group">
             <pre id="pnlReturnJavascript">
             </pre>
@@ -36,7 +37,7 @@
             </div>
         </div>
     </section>
-        <script type="text/javascript">
+    <script type="text/javascript">
 
         $(function () {
 
@@ -68,19 +69,44 @@
                     Double: function (x) {
                         return x * 2;
                     }
-                }
-
+                };
+            var compiledResult = "";
             $("#btnExecute").click(function () {
-                var compiled = new Function("return this.function.composeLeft(this.Increase, this.Double)(4)");
-                console.log(compiled.toString());
-                $("#pnlReturnJavascript").text(compiled.toString());
                 var textValue = $("#txtInputData").val();
-                if (textValue != "") {
+                $.ajax({
+                    url: 'api/JsTransformer/Translate',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(textValue),
+                    success: function (data) {
+                        //var compiled = new Function("return this.function.composeLeft(this.Increase, this.Double)(4)");
+                        compiledResult = data.compiledString;
+                        var compiled = new Function(data.compiledString);
+                        console.log(compiled.toString());
+                        $("#pnlReturnJavascript").text(compiled.toString());
+
+                        if (textValue != "") {
+                            context = Object.assign(context, variables);
+                            $("#pnlResult").text(compiled.call(context));
+                        }
+                    }
+                })
+
+            });
+            $("#btnExecuteTest").click(function () {
+                
+                var compiled = new Function(compiledResult);
+                var variables =
+                    {
+                        a: 1,
+                        b: 2
+                    };               
                     context = Object.assign(context, variables);
                     $("#pnlResult").text(compiled.call(context));
-                }
-            });
+                    
+                });
         });
-        </script>
-    </body>
+    </script>
+</body>
 </html>

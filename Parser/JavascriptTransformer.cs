@@ -36,7 +36,7 @@ namespace Vee.Parser
             {
                 declarationStrs = "";
             }
-            return $"function() {{ {declarationStrs}return {Visit(context.expression())}; }}";
+            return $" {declarationStrs}return {Visit(context.expression())}; ";
         }
 
         public override string VisitConstant(VeeParser.ConstantContext context)
