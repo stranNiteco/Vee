@@ -520,6 +520,7 @@ public partial class VeeParser : Parser {
 		}
 	}
 	public partial class PatternMathchingContext : ExpressionContext {
+		public ExpressionContext @else;
 		public ITerminalNode If() { return GetToken(VeeParser.If, 0); }
 		public ExpressionContext[] expression() {
 			return GetRuleContexts<ExpressionContext>();
@@ -1222,7 +1223,7 @@ public partial class VeeParser : Parser {
 				case 1:
 					{
 					State = 176; Match(Else);
-					State = 177; expression(0);
+					State = 177; ((PatternMathchingContext)_localctx).@else = expression(0);
 					}
 					break;
 				}
