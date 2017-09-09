@@ -151,9 +151,68 @@ namespace Vee.Parser
         {
             var left = context.left.Text.TrimStart('?');
             var right = Visit(context.right);
-            //var opType = VeeLexer.DefaultVocabulary.lambdaOperators().GetText()
+            var (text, type) = VisitLambdaOperators(context.op);
+            var body = VisitBinaryOperator(left, text, right, type);
+            return $"({left} => {body})";
+        }
 
-            return VisitBinaryOperator(left, op.Text, right, op.Type);
+        public override string VisitRightBinaryLambda(VeeParser.RightBinaryLambdaContext context)
+        {
+            var left = Visit(context.left);
+            var right = context.right.Text.TrimStart('?');
+            var (text, type) = VisitLambdaOperators(context.op);
+            var body = VisitBinaryOperator(left, text, right, type);
+            return $"({right} => {body})";
+        }
+
+        public override string VisitBinaryLambda(VeeParser.BinaryLambdaContext context) {
+            var left = context.left.Text.TrimStart('?');
+            var right = context.right.Text.TrimStart('?');
+            var (text, type) = VisitLambdaOperators(context.op);
+            var body = VisitBinaryOperator(left, text, right, type);
+            if (left == right) {
+                return $"({right} => {body})";
+            }
+            else {
+                return $"(({left}, {right}) => {body})";
+            }
+        }
+
+        public static (string text, int type) VisitLambdaOperators(VeeParser.LambdaOperatorsContext context) {
+            ITerminalNode pow, multiply, divide, modulo, plus, minus, eq, neq, andAlso, orElse, gte, gt, lt, lte, concat;
+            if ((pow = context.Pow()) != null) {
+                return (pow.Symbol.Text, pow.Symbol.Type);
+            } else if ((multiply = context.Multiply()) != null) {
+                return (multiply.Symbol.Text, multiply.Symbol.Type);
+            } else if ((divide = context.Divide()) != null) {
+                return (divide.Symbol.Text, divide.Symbol.Type);
+            } else if ((modulo = context.Modulo()) != null) {
+                return (modulo.Symbol.Text, modulo.Symbol.Type);
+            } else if ((plus = context.Plus()) != null) {
+                return (plus.Symbol.Text, plus.Symbol.Type);
+            } else if ((minus = context.Minus()) != null) {
+                return (minus.Symbol.Text, minus.Symbol.Type);
+            } else if ((eq = context.Eq()) != null) {
+                return (eq.Symbol.Text, eq.Symbol.Type);
+            } else if ((neq = context.Neq()) != null) {
+                return (neq.Symbol.Text, neq.Symbol.Type);
+            } else if ((andAlso = context.AndAlso()) != null) {
+                return (andAlso.Symbol.Text, andAlso.Symbol.Type);
+            } else if ((orElse = context.OrElse()) != null) {
+                return (orElse.Symbol.Text, orElse.Symbol.Type);
+            } else if ((lte = context.Lte()) != null) {
+                return (lte.Symbol.Text, lte.Symbol.Type);
+            } else if ((lt = context.Lt()) != null) {
+                return (lt.Symbol.Text, lt.Symbol.Type);
+            } else if ((gt = context.Gt()) != null) {
+                return (gt.Symbol.Text, gt.Symbol.Type);
+            } else if ((gte = context.Gte()) != null) {
+                return (gte.Symbol.Text, gte.Symbol.Type);
+            } else if ((concat = context.Concat()) != null) {
+                return (concat.Symbol.Text, concat.Symbol.Type);
+            } else {
+                throw new InvalidOperationException("Impossible state");
+            }
         }
 
         public override string VisitDeclarations([NotNull] VeeParser.DeclarationsContext context)
