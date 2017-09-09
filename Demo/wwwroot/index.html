@@ -23,7 +23,7 @@
         </div>
         <div class="form-group">
             <button type="button" class="btn btn-default" id="btnExecute">Compile</button>
-            <button type="button" class="btn btn-default" id="btnExecuteTest">Execute</button>
+
         </div>
 
         <div class="form-group">
@@ -32,11 +32,27 @@
         </div>
         <div class="form-group">
             <div class="panel panel-success">
-                <div class="panel-heading">Result</div>
+                <div class="panel-heading">Variable Input</div>
+                <div class="panel-body" id="pnlVariables">Panel Variables</div>
+            </div>
+        </div>
+        <div class="form-group">
+            <button type="button" class="btn btn-default" id="btnExecuteTest">Execute</button>
+        </div>
+        <div class="form-group">
+            <div class="panel panel-success">
+                <div class="panel-heading">Please enter value for</div>
                 <div class="panel-body" id="pnlResult">Panel Result</div>
             </div>
         </div>
+
     </section>
+    <script id="hidden-template" type="text/x-custom-template">
+        <div class="form-group">
+            <label for="inputdefault">labeltemp</label>
+            <input class="form-control id-class" id="idtemp" type="text" name="varName">
+        </div>
+    </script>
     <script type="text/javascript">
 
         $(function () {
@@ -71,6 +87,7 @@
                     }
                 };
             var compiledResult = "";
+            var variablesArray = "";
             $("#btnExecute").click(function () {
                 var textValue = $("#txtInputData").val();
                 $.ajax({
@@ -82,30 +99,35 @@
                     success: function (data) {
                         //var compiled = new Function("return this.function.composeLeft(this.Increase, this.Double)(4)");
                         compiledResult = data.compiledString;
+                        variablesArray = data.variables; 
                         var compiled = new Function(data.compiledString);
-                        console.log(compiled.toString());
+
                         $("#pnlReturnJavascript").text(compiled.toString());
 
-                        if (textValue != "") {
-                            context = Object.assign(context, variables);
-                            $("#pnlResult").text(compiled.call(context));
-                        }
+                        var arr = jQuery.map(data.variables, function (item) {
+                            var template = $('#hidden-template').html();
+                            template = template.toString().replace("labeltemp", item.toString());
+                            template = template.toString().replace("idtemp", item.toString() + "-Id");
+                            template = template.toString().replace("varName", item.toString());
+                            return template;
+                        });
+                        $("#pnlVariables").html("");
+                        $("#pnlVariables").append(arr.join(""));                       
                     }
                 })
-
             });
             $("#btnExecuteTest").click(function () {
-                
+
                 var compiled = new Function(compiledResult);
-                var variables =
-                    {
-                        a: 1,
-                        b: 2
-                    };               
-                    context = Object.assign(context, variables);
-                    $("#pnlResult").text(compiled.call(context));
-                    
-                });
+                var variables = [...document.querySelectorAll(".id-class")].reduce((acc, item) => {
+                    acc[item.name] = parseFloat(item.value);
+                    return acc;
+                }, {});
+                console.log(variables);
+                context = Object.assign(context, variables);
+                $("#pnlResult").text(compiled.call(context));
+            });
+
         });
     </script>
 </body>
