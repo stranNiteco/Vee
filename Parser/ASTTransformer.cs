@@ -6,7 +6,10 @@ using Vee.Parser.Grammar;
 using Antlr4.Runtime.Tree;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Parser;
+
 
 namespace Vee.Parser
 {
@@ -58,6 +61,8 @@ namespace Vee.Parser
         }
 
         public string Text { get; private set; }
+
+        [JsonConverter(typeof(StringEnumConverter))]
         public NodeType Type { get; private set; }
         public IEnumerable<Node> Children { get; private set; }
     }
