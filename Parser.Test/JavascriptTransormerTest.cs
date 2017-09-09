@@ -39,7 +39,9 @@ namespace Parser.Test
         [InlineData("function() { return 2 && 1; }", "2 and 1")]
         [InlineData("function() { return this.function.composeAnd(2, 1); }", "2 && 1")]
         [InlineData("function() { return this.function.composeOr(2, 1); }", "2 || 1")]
-        [InlineData("function() { return this.function.inverse(2); }", "!2")]
+        [InlineData("function() { return this.function.inverse(2); }", "!2")]         
+        [InlineData("function() { return this.function.composeLeft(2, 1); }", "2 << 1")]
+        [InlineData("function() { return this.function.composeRight(2, 1); }", "2 >> 1")]   			  
         public void Addition(string expected, string input)
         {
             var result = JavascriptTransformer.Transform(input);
