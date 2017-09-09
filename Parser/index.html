@@ -1,0 +1,88 @@
+<html>
+    <head>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+    <div class="container">
+      <div class="jumbotron">
+        <h1>Vee Demo</h1>      
+        <p>#Team 2</p>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="comment">Input Value:</label>
+      <textarea class="form-control" rows="5" id="comment" id="txtInputData"></textarea>
+    </div>
+    <div class="form-group">
+    <button type="button" class="btn btn-default" id="btnExecute">Compile</button>
+    </div>
+    <div class="form-group">
+      <div class="panel panel-primary">
+          <div class="panel-heading">Return Javascript</div>
+          <div class="panel-body" id="pnlReturnJavascript">Panel Javascript</div>
+        </div>
+    </div>
+    <div class="form-group">
+      <div class="panel panel-success">
+          <div class="panel-heading">Result</div>
+          <div class="panel-body" id="pnlResult">Panel Result</div>
+        </div>
+    </div>
+    </body>
+    <script>
+        
+    $(function(){
+            
+        var context = {
+             
+            function:{
+                pow : (x,y) => Math.pow(x,y),
+                concat:(x,y) => String.prototype.concat(x,y),
+                inverse:(x) => !x,
+                composeAnd: function(x,y){
+                            return a => x(a) && y(a);
+                        },
+                composeOr:function(x,y){
+                            return a => x(a) || y(a);
+                        },
+                composeLeft:function(x,y){
+                            return a => y(x(a));
+                        },
+                composeRight:function(x,y){
+                            return a => x(y(a));
+                        },        
+                    }
+                  }
+        var variables = 
+        {
+            Increase:function(x){
+                return x+1;
+            },
+            Double:function(x){
+                return x*2;
+            }
+        }
+        
+        $("#btnExecute").click(function(){
+            var compiled = new Function("return this.function.composeLeft(this.Increase, this.Double)(4)");
+            console.log(compiled.toString());
+            $("#pnlReturnJavascript").text(compiled.toString());
+            var textValue = $("#txtInputData").val();		
+            if(textValue != ""){
+                context = Object.assign(context, variables);
+                    $("#pnlResult").text(compiled.call(context));
+            }
+        });
+    });
+        
+        
+    </script>
+    </html>
