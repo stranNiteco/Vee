@@ -16,6 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\index.html" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Parser\Parser.csproj" />
   </ItemGroup>
 
