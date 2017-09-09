@@ -135,6 +135,86 @@ namespace Vee.Parser
             return $"({parameters} => {{ {declarationStrs}return {body} }})";
         }
 
+        public override string VisitMemberLambda([NotNull] VeeParser.MemberLambdaContext context)
+        {
+            var memberStr = Visit(context.member());
+            return $"(x => x{memberStr})";
+        }
+
+        public override string VisitUnaryLambda([NotNull] VeeParser.UnaryLambdaContext context)
+        {
+            var op = LookupJsOperator(context.op.Type);
+            return $"(x => {op}x)";
+        }
+
+        public override string VisitLeftBinaryLambda([NotNull] VeeParser.LeftBinaryLambdaContext context)
+        {
+            var left = context.left.Text.TrimStart('?');
+            var right = Visit(context.right);
+            var (text, type) = VisitLambdaOperators(context.op);
+            var body = VisitBinaryOperator(left, text, right, type);
+            return $"({left} => {body})";
+        }
+
+        public override string VisitRightBinaryLambda(VeeParser.RightBinaryLambdaContext context)
+        {
+            var left = Visit(context.left);
+            var right = context.right.Text.TrimStart('?');
+            var (text, type) = VisitLambdaOperators(context.op);
+            var body = VisitBinaryOperator(left, text, right, type);
+            return $"({right} => {body})";
+        }
+
+        public override string VisitBinaryLambda(VeeParser.BinaryLambdaContext context) {
+            var left = context.left.Text.TrimStart('?');
+            var right = context.right.Text.TrimStart('?');
+            var (text, type) = VisitLambdaOperators(context.op);
+            var body = VisitBinaryOperator(left, text, right, type);
+            if (left == right) {
+                return $"({right} => {body})";
+            }
+            else {
+                return $"(({left}, {right}) => {body})";
+            }
+        }
+
+        public static (string text, int type) VisitLambdaOperators(VeeParser.LambdaOperatorsContext context) {
+            ITerminalNode pow, multiply, divide, modulo, plus, minus, eq, neq, andAlso, orElse, gte, gt, lt, lte, concat;
+            if ((pow = context.Pow()) != null) {
+                return (pow.Symbol.Text, pow.Symbol.Type);
+            } else if ((multiply = context.Multiply()) != null) {
+                return (multiply.Symbol.Text, multiply.Symbol.Type);
+            } else if ((divide = context.Divide()) != null) {
+                return (divide.Symbol.Text, divide.Symbol.Type);
+            } else if ((modulo = context.Modulo()) != null) {
+                return (modulo.Symbol.Text, modulo.Symbol.Type);
+            } else if ((plus = context.Plus()) != null) {
+                return (plus.Symbol.Text, plus.Symbol.Type);
+            } else if ((minus = context.Minus()) != null) {
+                return (minus.Symbol.Text, minus.Symbol.Type);
+            } else if ((eq = context.Eq()) != null) {
+                return (eq.Symbol.Text, eq.Symbol.Type);
+            } else if ((neq = context.Neq()) != null) {
+                return (neq.Symbol.Text, neq.Symbol.Type);
+            } else if ((andAlso = context.AndAlso()) != null) {
+                return (andAlso.Symbol.Text, andAlso.Symbol.Type);
+            } else if ((orElse = context.OrElse()) != null) {
+                return (orElse.Symbol.Text, orElse.Symbol.Type);
+            } else if ((lte = context.Lte()) != null) {
+                return (lte.Symbol.Text, lte.Symbol.Type);
+            } else if ((lt = context.Lt()) != null) {
+                return (lt.Symbol.Text, lt.Symbol.Type);
+            } else if ((gt = context.Gt()) != null) {
+                return (gt.Symbol.Text, gt.Symbol.Type);
+            } else if ((gte = context.Gte()) != null) {
+                return (gte.Symbol.Text, gte.Symbol.Type);
+            } else if ((concat = context.Concat()) != null) {
+                return (concat.Symbol.Text, concat.Symbol.Type);
+            } else {
+                throw new InvalidOperationException("Impossible state");
+            }
+        }
+
         public override string VisitDeclarations([NotNull] VeeParser.DeclarationsContext context)
         {
             var declarations = context.declaration();
@@ -298,6 +378,7 @@ namespace Vee.Parser
             }
             return result;
         }
+
         public override string VisitLogicalNot(VeeParser.LogicalNotContext context)
             => VisitUnaryOperator(context.op, context.expression());
 
@@ -308,15 +389,15 @@ namespace Vee.Parser
             => VisitUnaryOperatorFunction(context.op, context.expression());
 
         public override string VisitExponentiation(VeeParser.ExponentiationContext context)
-            => VisitBinaryOperatorFunction(context.left, context.op, context.right);
+            => VisitBinaryOperator(context.left, context.op, context.right);
         public override string VisitConcatenation(VeeParser.ConcatenationContext context)
-         => VisitBinaryOperatorFunction(context.left, context.op, context.right);
+         => VisitBinaryOperator(context.left, context.op, context.right);
         //TODO: create javascript function PredicateComposition
         public override string VisitPredicateComposition(VeeParser.PredicateCompositionContext context)
-            => VisitBinaryOperatorFunction(context.left, context.op, context.right);
+            => VisitBinaryOperator(context.left, context.op, context.right);
         //TODO: create FunctionComposition
         public override string VisitFunctionComposition(VeeParser.FunctionCompositionContext context)
-            => VisitBinaryOperatorFunction(context.left, context.op, context.right);
+            => VisitBinaryOperator(context.left, context.op, context.right);
 
         public override string VisitMultiplicative(VeeParser.MultiplicativeContext context)
             => VisitBinaryOperator(context.left, context.op, context.right);
@@ -350,32 +431,34 @@ namespace Vee.Parser
             return $"{fn}({expression})";
         }
 
-        private string VisitBinaryOperatorFunction(VeeParser.ExpressionContext left, IToken @operator, VeeParser.ExpressionContext right)
-        {
-            var leftStr = Visit(left);
-            var rightStr = Visit(right);
+        private string VisitBinaryOperator(VeeParser.ExpressionContext left, IToken @operator, VeeParser.ExpressionContext right) => VisitBinaryOperator(Visit(left), @operator.Text, Visit(right), @operator.Type);
 
-            var fn = LookupJsOperatorFunction(@operator.Type);
-            return $"{fn}({leftStr}, {rightStr})";
-        }
-
-        private string VisitBinaryOperator(VeeParser.ExpressionContext left, IToken @operator, VeeParser.ExpressionContext right)
+        private static string VisitBinaryOperator(string left, string op, string right, int opType)
         {
-            var leftStr = Visit(left);
-            var rightStr = Visit(right);
-            var op = LookupJsOperator(@operator.Type);
-            return $"{leftStr} {op} {rightStr}";
+            string fnOp, binOp;
+            if (!string.IsNullOrWhiteSpace(fnOp = LookupJsOperatorFunction(opType)))
+            {
+                return $"{fnOp}({left}, {right})";
+            }
+            else if (!string.IsNullOrWhiteSpace(binOp = LookupJsOperator(opType)))
+            {
+                return $"{left} {binOp} {right}";
+            }
+            else
+            {
+                throw new NotSupportedException($"Operator type not found: {left} {op} {right} ({opType})");
+            }
         }
 
         private static string LookupJsOperatorFunction(int operatorType)
         {
+            //TODO: Define functions in JS runtime 
             switch (operatorType)
             {
                 case VeeLexer.Pow:
                     return "this.function.pow";
                 case VeeLexer.Concat:
                     return "this.function.concat";
-                //TODO: Define function ComposeAnd in javascript    
                 case VeeLexer.Inverse:
                     return "this.function.inverse";
                 case VeeLexer.ComposeAnd:
@@ -424,7 +507,7 @@ namespace Vee.Parser
 
         private static string GetStringContent(ITerminalNode stringNode)
         {
-            // TODO: replace escape, 
+            // TODO: replace escape, interpolations...
             return stringNode.Symbol.Text;
         }
     }

@@ -497,51 +497,45 @@ public interface IVeeVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitLambdaBody([NotNull] VeeParser.LambdaBodyContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>leftOperator</c>
+	/// Visit a parse tree produced by the <c>leftBinaryLambda</c>
 	/// labeled alternative in <see cref="VeeParser.operators"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitLeftOperator([NotNull] VeeParser.LeftOperatorContext context);
+	Result VisitLeftBinaryLambda([NotNull] VeeParser.LeftBinaryLambdaContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>rightOperator</c>
+	/// Visit a parse tree produced by the <c>rightBinaryLambda</c>
 	/// labeled alternative in <see cref="VeeParser.operators"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitRightOperator([NotNull] VeeParser.RightOperatorContext context);
+	Result VisitRightBinaryLambda([NotNull] VeeParser.RightBinaryLambdaContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>leftRightOperator</c>
+	/// Visit a parse tree produced by the <c>binaryLambda</c>
 	/// labeled alternative in <see cref="VeeParser.operators"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitLeftRightOperator([NotNull] VeeParser.LeftRightOperatorContext context);
+	Result VisitBinaryLambda([NotNull] VeeParser.BinaryLambdaContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>rightUnaryOperator</c>
+	/// Visit a parse tree produced by the <c>unaryLambda</c>
 	/// labeled alternative in <see cref="VeeParser.operators"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitRightUnaryOperator([NotNull] VeeParser.RightUnaryOperatorContext context);
+	Result VisitUnaryLambda([NotNull] VeeParser.UnaryLambdaContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>memberOperator</c>
+	/// Visit a parse tree produced by the <c>memberLambda</c>
 	/// labeled alternative in <see cref="VeeParser.operators"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitMemberOperator([NotNull] VeeParser.MemberOperatorContext context);
+	Result VisitMemberLambda([NotNull] VeeParser.MemberLambdaContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="VeeParser.binaryOperators"/>.
+	/// Visit a parse tree produced by <see cref="VeeParser.lambdaOperators"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitBinaryOperators([NotNull] VeeParser.BinaryOperatorsContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="VeeParser.unaryOperators"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitUnaryOperators([NotNull] VeeParser.UnaryOperatorsContext context);
+	Result VisitLambdaOperators([NotNull] VeeParser.LambdaOperatorsContext context);
 }
 } // namespace Vee.Parser.Grammar
